@@ -1,12 +1,11 @@
-//to inject iframe to page that has permissions to access the camera
 
 
-const cameraId = 'loom-camera';
-const camera = document.getElementById(cameraId);
+window.cameraId = 'loom-camera';
+window.camera = document.getElementById(cameraId);
 
 // check if camera exists
 
-if (camera) {
+if (window.camera) {
     console.log('camera found', camera);
 }else{
     const cameraElement = document.createElement('iframe');
