@@ -1,0 +1,43 @@
+{
+    "name": "Screen Recorder",
+    "description": "Records the current tab or the whole screen",
+    "version": "1.0",
+    "manifest_version": 3,
+    "minimum_chrome_version": "116",
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icons/recording.png",
+            "32": "icons/not-recording.png"
+        }
+    },
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [
+        "tabCapture",
+        "offScreen",
+        "scripting",
+        "storage",
+        "desktopCapture",
+        "tabs"
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "camera.html",
+                "camera.js",
+                "video.html",
+                "video.js"
+            ],
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ]
+        }
+    ]
+}
