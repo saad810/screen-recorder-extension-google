@@ -15,23 +15,29 @@ const updateRecording = async (state, type) => {
 const startRecording = async (type) => {
     console.log(`Starting recording of type: ${type}`);
     await updateRecording(true, type);
+    // change the icon
+    chrome.action.setIcon({ path: 'icons/recording.png' });
     // Logic to start recording
     if (type === 'tab') {
-        recordTab();
+        recordTabState(true);
     }
 
 }
 const stopRecording = async () => {
     console.log('Stopping recording');
     await updateRecording(false, '');
+    // Logic to stop recording
+    // change the icon
+    chrome.action.setIcon({ path: 'icons/not-recording.png' });
+    recordTabState(false);
 }
 
-const recordTab = async () => {
+const recordTabState = async (start = true) => {
     // setup off screen document
     const existingContexts = await chrome.runtime.getContexts({});
 
     console.log('Existing contexts:', existingContexts);
-    const offScreenDocument = existingContexts.find(context => context.type === 'OFFSCREEN_DOCUMENT');
+    const offScreenDocument = existingContexts.find(context => context.contextType === 'OFFSCREEN_DOCUMENT');
     if (!offScreenDocument) {
         console.log('Creating new offscreen document');
         await chrome.offscreen.createDocument({
@@ -41,30 +47,38 @@ const recordTab = async () => {
         });
     }
 
-    // use tabcapture apu to get the stream
-    // get the id of active tab
-    const tab = await chrome.tabs.query({ active: true, currentWindow: true })
-    console.log('Active tab:', tab);
-    if (!tab || !tab.length) {
-        console.error('No active tab found');
-        return;
-    }
-    const tabId = tab[0].id;
-    console.log('Tab ID:', tabId);
-    const streamId = await chrome.tabCapture.getMediaStreamId(
-        {
-            targetTabId: tabId,
+    if (start) {
+        console.log('Starting tab capture');
+        // use tabcapture apu to get the stream
+        // get the id of active tab
+        const tab = await chrome.tabs.query({ active: true, currentWindow: true })
+        console.log('Active tab:', tab);
+        if (!tab || !tab.length) {
+            console.error('No active tab found');
+            return;
         }
-    );
+        const tabId = tab[0].id;
+        console.log('Tab ID:', tabId);
+        const streamId = await chrome.tabCapture.getMediaStreamId(
+            {
+                targetTabId: tabId,
+            }
+        );
 
-    console.log('Stream ID:', streamId);
+        console.log('Stream ID:', streamId);
 
-    // send to offscreen document
-    chrome.runtime.sendMessage({
-        type: "START_RECORDING",
-        target: 'OFFSCREEN_DOCUMENT',
-        data: streamId
-    });
+        // send to offscreen document
+        chrome.runtime.sendMessage({
+            type: "START_RECORDING",
+            target: 'OFFSCREEN_DOCUMENT',
+            data: streamId
+        });
+    } else {
+        chrome.runtime.sendMessage({
+            type: "STOP_RECORDING",
+            target: 'OFFSCREEN_DOCUMENT',
+        });
+    }
 
 };
 
