@@ -3,11 +3,15 @@
 window.cameraId = 'loom-camera';
 window.camera = document.getElementById(cameraId);
 
+
 // check if camera exists
 
 if (window.camera) {
     console.log('camera found', camera);
-}else{
+} else {
+    // const upworkBody = document.querySelector('body');
+
+   
     const cameraElement = document.createElement('iframe');
     cameraElement.id = cameraId;
     cameraElement.setAttribute('style',

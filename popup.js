@@ -5,6 +5,7 @@ const injectCamera = async () => {
 
     // if(tab[0].url && tab[0].url.startsWith)
 
+
     const tabId = tab[0].id;
     await chrome.scripting.executeScript({
         files: ['content.js'],
@@ -20,17 +21,14 @@ const screenBtn = document.querySelector('#screen');
 
 const checkRecordingStatus = async () => {
     const recording = await chrome.storage.local.get(['recording', 'type']);
-    console.log('Recording status retrieved from storage:', recording);
+    console.log('current state:', recording);
     const recordingStatus = recording.recording || false;
-    const recordingType = recording.type || 'unknown';
-    console.log(`Recording status: ${recordingStatus}`);
-    console.log(`Recording type: ${recordingType}`);
+    const recordingType = recording.type || '';
     return [recordingStatus, recordingType];
 }
 const init = async () => {
     const [recordingStatus, recordingType] = await checkRecordingStatus();
-    console.log(`Initial recording status: ${recordingStatus}`);
-    console.log(`Initial recording type: ${recordingType}`);
+   
 
     if (recordingStatus === false) {
 
@@ -50,16 +48,19 @@ const init = async () => {
             await chrome.runtime.sendMessage({
                 type: 'STOP_RECORDING'
             });
+            console.log('Recording stopped');
         } else {
             // start recording
             await chrome.runtime.sendMessage({
                 type: 'START_RECORDING',
                 recordingType: type
             });
+            console.log('Recording started');
             injectCamera();
         }
+        window.close(); // close the popup after starting/stopping recording
     }
-   
+
 
     recordBtn.addEventListener('click', async () => {
         console.log('Record button clicked');
@@ -70,7 +71,7 @@ const init = async () => {
         updateRecording('screen')
     });
 
- 
+
 }
 
 init();
