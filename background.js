@@ -21,6 +21,9 @@ const startRecording = async (type) => {
     if (type === 'tab') {
         recordTabState(true);
     }
+    if (type === 'screen') {
+        recordScreen();
+    }
 
 }
 const stopRecording = async () => {
@@ -31,7 +34,27 @@ const stopRecording = async () => {
     chrome.action.setIcon({ path: 'icons/not-recording.png' });
     recordTabState(false);
 }
+const recordScreen = async () => {
+    console.log('Recording screen');
+    // create a focused tab with index of 0
+    const desktopRecordPath = chrome.runtime.getURL('desktopRecord.html');
+    
+    const currentTab = await chrome.tabs.query({ active: true, currentWindow: true });
+    console.log('Current tab:', currentTab);
+    const currentTabId = currentTab[0].id;
 
+    const newTab = await chrome.tabs.create({
+        url: desktopRecordPath,
+        active: true,
+        pinned: true,
+        index: 0
+    });
+    // wait for few secs and send a message
+
+    setTimeout(() => {
+        chrome.tabs.sendMessage(newTab.id, { type: 'START_RECORDING', focusedTabId: currentTabId });
+    }, 1000);
+}
 const recordTabState = async (start = true) => {
     // setup off screen document
     const existingContexts = await chrome.runtime.getContexts({});
