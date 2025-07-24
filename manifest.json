@@ -13,7 +13,8 @@
     },
     "host_permissions": [
         "http://*/*",
-        "https://*/*"
+        "https://*/*",
+        "chrome-extension://*/*"
     ],
     "background": {
         "service_worker": "background.js"

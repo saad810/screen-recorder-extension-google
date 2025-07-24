@@ -1,4 +1,31 @@
+const convertBlobToBase64 = (blob) => {
+    console.log("[desktopRecord.js] Converting blob to base64:", blob);
+    console.log("[desktopRecord.js] Blob type:", blob.type);
+    console.log("[desktopRecord.js] Blob size:", blob.size);
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+            const base64data = reader.result;
+            resolve(base64data);
+        };
+    });
+};
+
+const fetchBlob = async (url) => {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`Failed to fetch blob from ${url}: ${response.statusText}`);
+    }
+    const blob = await response.blob();
+    const base64data = await convertBlobToBase64(blob);
+    return base64data;
+};
+
 // listening to messages from the background script start/stop recording
+
+
+
 
 
 chrome.runtime.onMessage.addListener((message, sender) => {
@@ -72,7 +99,7 @@ const startRecording = async (focusedTabId) => {
                 }
             };
 
-            recorder.onstop = async()=>{
+            recorder.onstop = async () => {
                 console.log("[desktopRecord.js] Recording stopped, processing data...");
                 // send the data to the background script
                 console.log('[desktopRecord.js] Data length:', data.length);
@@ -80,11 +107,14 @@ const startRecording = async (focusedTabId) => {
                 data = []
 
                 // convrt to a blob
-                // const blob = new Blob(data, { type: 'video/webm' });
-                // console.log("[desktopRecord.js] Blob created:", blob);
-                // const url = URL.createObjectURL(blob);
-                // console.log("[desktopRecord.js] Blob URL created:", url);
-                // window.open(url, '_blank'); // open the recorded video in a new tab
+                const blob = new Blob(data, { type: 'video/webm' });
+                const base64data = await fetchBlob(blob);
+
+                // send message to servidce worker
+                chrome.runtime.sendMessage({
+                    type: "OPEN_TAB",
+                    base64data,
+                });
             }
             recorder.start();
             console.log("[desktopRecord.js] Recorder started successfully.");

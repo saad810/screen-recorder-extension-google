@@ -94,8 +94,10 @@ const startRecording = async (streamId) => {
             const blob = new Blob(data, { type: 'video/webm' });
             const url = URL.createObjectURL(blob);
             console.log("[offscreen.js] Blob URL created:", url);
-            window.open(url, '_blank'); // open the recorded video in a new tab
-
+            chrome.runtime.sendMessage({
+                type: "OPEN_TAB",
+                url,
+            });
         };
         recorder.start();
         console.log("[offscreen.js] Recorder started successfully.");

@@ -8,6 +8,8 @@ window.camera = document.getElementById(cameraId);
 
 if (window.camera) {
     console.log('camera found', camera);
+    // if camera exists, remove it
+     document.querySelector('loom-camera').style.display = 'block';
 } else {
     // const upworkBody = document.querySelector('body');
 
